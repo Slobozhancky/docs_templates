@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+</head>
+
+<body>
+    <div class="container">
+
+        {% set mnths = ['','January','February','March','April','May','June','July',
+        'August','September','October','November','December'] %}
+
+        <header class="header">
+            <div>
+                <img class="angle-picture"
+                    src="https://keycrm.ams3.cdn.digitaloceanspaces.com/storage/spets/uploads/2024-03-21/JgmtwNwKGYZDh7mZqIRbpPMEyxuwwWaP.png"
+                    alt="">
+            </div>
+            <div>
+                <div style="display:flex; justify-content: end;">
+                    <img src="https://keycrm.ams3.cdn.digitaloceanspaces.com/storage/spets/uploads/2024-03-21/eiRf1KSziJhgmniMuTd9pzp9A4uv8NP7.png"
+                        style="width: 200px; height: 200px;" class="logo" alt="logo">
+                </div>
+                <div class="company-info" style="margin-bottom: 10px;">
+                    <p class="child"
+                        style="font-size: 18px; font-weight: bold; text-align: right; margin-bottom: 10px;">Lorem, ipsum
+                        dolor.</p>
+                    <p class="child"
+                        style="font-size: 18px; font-weight: bold; text-align: right; margin-bottom: 10px;">Lorem ipsum
+                        dolor sit, amet consectetur adipisicing elit. Blanditiis, repellendus.</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+
+            <div style="display: flex; justify-content: space-between;">
+                <div class="user-info">
+                    <ul>
+                        <h4 style="font-size: 24px; margin-bottom: 5px;">Invoice To</h4>
+                        <li><span class="user">{{ model.client_name }}</span></li>
+                        <li>{{ model.client_email }}</li>
+                        <li>{{ model.client_phone }}</li>
+                        <li>
+                            {{ model.shipping_receive_point != '.' ? model.shipping_receive_point ~ ", " : '' }}
+                            {{ model.shipping_address_city != '.'? model.shipping_address_city ~ ", " : '' }}
+                            {{ model.shipping_address_region != '.'? model.shipping_address_region ~ ", " : ''}}
+                            {{ model.shipping_address_zip != '.'? model.shipping_address_zip : ''}}
+                        </li>
+                    </ul>
+                </div>
+                <h3 class="doc-name" style="margin-bottom: 10px;">INVOICE</h3>
+            </div>
+            <div class="invoice-to" style="margin-bottom: 10px; display: flex; justify-content: end;">
+                <div class="invoice-info">
+                    <ul>
+                        <li style="display: flex; align-items: center;"><span>Invoice # </span> <span class="mod"
+                                style="margin-left: 10px;"> {{ model.id }}</span></li>
+                        <li style="display: flex; justify-content: space-between;"><span>Date:</span> <span>{{
+                                model.created_at|date("j") }} {{ mnths[model.created_at|date("n")] }} {{
+                                model.created_at|date("Y") }}</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <table style="margin-bottom: 10px; border-collapse: collapse; border-spacing: 0;">
+                <tbody>
+                    <tr class="table-header">
+                        <th style="width: 10%;">
+                            <div class="table-orange-th mod-l">No</div>
+                        </th>
+                        <th style="width: 10%;">
+                            <div class="table-gray-th">#</div>
+                        </th>
+                        <th style="width: 45%;">
+                            <div class="table-gray-th">Item Description</div>
+                        </th>
+                        <th style="width: 5%;">
+                            <div class="table-gray-th">Qty</div>
+                        </th>
+                        <th style="width: 15%;">
+                            <div class="table-gray-th">Price</div>
+                        </th>
+                        <th style="width: 15%;">
+                            <div class="table-gray-th">Vat</div>
+                        </th>
+                        <th style="width: 15%;">
+                            <div class="table-orange-th mod-r">Total</div>
+                        </th>
+                    </tr>
+
+                    {% set net_total = 0 %}
+                    {% for key, product in model.products %}
+
+                    <tr class="table-body">
+                        <td>
+                            <div>{{ key + 1 }}</div>
+                        </td> <!-- No -->
+                        <td>
+                            <div><img src="{{ product.product_image }}"
+                                    style="max-height: 50px; width: auto; border: 0; background: lightgrey;" /></div>
+                        </td> <!--Image -->
+                        <td>
+                            <div>
+
+                                {% if product.product_name|length > 30 %}
+                                {{ product.product_name|slice(0, 30) }}...
+                                {% else %}
+                                {{ product.product_name }}
+                                {% endif %}
+
+
+                            </div>
+                        </td> <!-- Description -->
+                        <td>
+                            <div>{{ product.product_quantity }}</div>
+                        </td> <!-- Qty -->
+                        <td>
+                            <div>£{{ product.price_sold|number_format(2, ',', '') }}</div>
+                        </td> <!-- Price -->
+                        <td>
+                            <div>£{{ (product.price_sold * 0.2)|number_format(2, ',', '') }}</div>
+                        </td> <!-- Vat -->
+                        <td>
+                            <div>£{{ product.product_quantity * (product.price_sold * 1.2) }}</div>
+                        </td> <!-- Total -->
+                    </tr>
+
+                    {% set net_total = net_total + (product.product_quantity * product.price_sold) %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="payment-for-order-wrapper" style="display: flex; justify-content: space-between;">
+                <div>
+                    <p style="display: flex; justify-content: space-between;">
+                    <p><strong>Payment details:</strong> Some Bank</p>
+                    <p><strong>Account number:</strong> 482123512318</p>
+                    <p><strong>Sort code:</strong> 367-1-211</p>
+                    <p><strong>IBAN:</strong> UA 12314354556324234234</p>
+                    <p><strong>BIC:</strong> FFS13143545</p>
+                    </p>
+                </div>
+                <div class="payment-for-order">
+                    <p style="display: flex; justify-content: space-between;"><span class="payment">Subtotal</span><span
+                            class="payment">£{{ net_total }}</span></p>
+                    <p style="display: flex; justify-content: space-between;"><span class="payment">Discount</span>
+                        <span class="payment">£{{ model.OR_1002|number_format(2, '.', '') }}</span></p>
+                    <p style="display: flex; justify-content: space-between;"><span class="payment">Total VAT</span>
+                        <span class="payment">£{{ (net_total * 0.2)}}</span></p>
+                    <p class="total-price" style="display: flex; justify-content: space-between;"><span
+                            style="margin-left: -20px;" class="payment-name payment">Grand total</span> <span
+                            class="payment-price payment" style="margin-right: -20px;">{{ ((net_total + (net_total *
+                            0.2) - model.OR_1002|number_format(2, '.', '')))|format_currency('GBP', locale='uk')
+                            }}</span></p>
+                </div>
+            </div>
+
+            <p style="font-size: 20px;"><strong>TERMS & CONDITIONS</strong></p><br><br>
+            <div>
+                <p>1. Prices are valid for 1 week</p>
+                <p>2. Equipment delivery time is from 5-7 working days</p>
+                <p>3. Work completion time is from 3 to 5 days</p>
+            </div>
+    </div>
+    </main>
+
+    <footer>
+        <div class="contacts">
+            <ul style="display: flex; justify-content: space-between;">
+                <li style="display: flex; align-items: center; margin-right: 20px;">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+                        id="Capa_1" x="0px" y="0px" width="32px" height="32px" viewBox="0 0 477.156 477.156"
+                        style="enable-background:new 0 0 477.156 477.156;" xml:space="preserve" fill="#fd680c">
+                        <g>
+                            <path
+                                d="M475.009,380.316l-2.375-7.156c-5.625-16.719-24.062-34.156-41-38.75l-62.688-17.125c-17-4.625-41.25,1.594-53.688,14.031   l-22.688,22.688c-82.453-22.28-147.109-86.938-169.359-169.375L145.9,161.94c12.438-12.438,18.656-36.656,14.031-53.656   l-17.094-62.719c-4.625-16.969-22.094-35.406-38.781-40.969L96.9,2.19c-16.719-5.563-40.563,0.063-53,12.5L9.962,48.659   C3.899,54.69,0.024,71.94,0.024,72.003c-1.187,107.75,41.063,211.562,117.281,287.781   c76.031,76.031,179.454,118.219,286.891,117.313c0.562,0,18.312-3.813,24.375-9.845l33.938-33.938   C474.946,420.878,480.571,397.035,475.009,380.316z" />
+                        </g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                        <g></g>
+                    </svg>
+
+                    <span style="font-size: 24px; font-weight: bold; margin-left: 15px;">+1-525-5522-44-11</span>
+
+                </li>
+                <li style="display: flex; align-items: center;">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                        enable-background="new 0 0 64 64" version="1.1" viewBox="0 0 64 64" xml:space="preserve"
+                        width="32px" height="32px" fill="#fd680c">
+                        <g id="Glyph_copy_2">
+                            <path
+                                d="M63.125,9.977c-0.902-1.321-2.419-2.194-4.131-2.194H5.006c-1.676,0-3.158,0.842-4.067,2.117l31.16,25.982L63.125,9.977z" />
+                            <path
+                                d="M0.006,14.328v36.889c0,2.75,2.25,5,5,5h53.988c2.75,0,5-2.25,5-5V14.461L32.099,41.09L0.006,14.328z" />
+                        </g>
+                    </svg>
+
+                    <span style="font-size: 24px; font-weight: bold; margin-left: 15px;">test@test.com</span>
+
+                </li>
+                <li>
+                    <img class="angle-picture"
+                        src="https://keycrm.ams3.cdn.digitaloceanspaces.com/storage/spets/uploads/2024-03-22/WKyqdN4SiNFkPHh4oMWlTZNWUWCPUt2T.png"
+                        alt="">
+                </li>
+            </ul>
+        </div>
+        <div style="display: flex; justify-content: end;">
+
+        </div>
+    </footer>
+
+    </div>
+
+    <style>
+        :root {
+            --main: #fd680c;
+            --gray: #494949;
+        }
+
+        * {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .header .angle-picture {
+            height: 290px;
+        }
+
+        .header .company-info {
+            width: 360px;
+            margin-top: 10px;
+            position: relative;
+            bottom: 55px;
+        }
+
+        .header .company-info .child {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .main {
+            display: block;
+            width: 100%;
+        }
+
+        .main table {
+            margin: 0 auto;
+        }
+
+        .main .doc-name {
+            color: #fd680c;
+            font-weight: bold;
+            font-size: 70px;
+            text-align: right;
+        }
+
+        .table-body {
+            margin-bottom: 5px;
+        }
+
+        .table-body td {
+            padding-bottom: 5px;
+        }
+
+        .table-body td div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 70px;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .table-body:nth-child(even) div {
+            background-color: #F0F0F0;
+        }
+
+        .table-body:nth-child(odd) div {
+            background-color: #E0E0E0;
+        }
+
+        table .table-gray-th,
+        .table-orange-th {
+            font-weight: bold;
+            background-color: #494949;
+            padding: 15px 20px;
+            color: white;
+            margin: 0 5px 10px;
+        }
+
+        table .table-orange-th.mod-l {
+            margin-left: 0;
+        }
+
+        table .table-orange-th.mod-r {
+            margin-right: 0;
+        }
+
+        table .table-orange-th {
+            background-color: #fd680c;
+        }
+
+        .invoice-to {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .invoice-to .user-info ul li,
+        .invoice-info ul li {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .invoice-to .invoice-info .mod {
+            border: 1px solid black;
+            padding: 3px;
+            text-align: right;
+        }
+
+        .invoice-to .user {
+            color: #fd680c;
+        }
+
+        .main .delivery {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .payment-for-order {
+
+            width: 350px;
+        }
+
+        .main .payment-for-order p {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 5px 20px 5px;
+            margin: 0 5px 5px;
+        }
+
+        .payment-for-order .payment-name,
+        .payment-price {
+            font-weight: bold;
+            background-color: #494949;
+            padding: 15px 20px;
+            color: white;
+            margin: 0px 5px 5px;
+            background-color: #fd680c;
+        }
+
+        .payment-for-order .payment-price {
+            background-color: #494949;
+        }
+    </style>
+
+
+
+</body>
+
+</html>
